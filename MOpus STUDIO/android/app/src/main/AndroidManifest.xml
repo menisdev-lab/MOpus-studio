@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  =============================================================================
+  MOpus Studio - android/app/src/main/AndroidManifest.xml
+  -----------------------------------------------------------------------------
+  App:      MOpus Studio
+  Package:  com.mopus.studio          (android/app/build.gradle -> applicationId)
+  Brand:    Jet Black #050505 background, Electric Orange #FF6B00 + Pure White
+            #FFFFFF emblem; launcher icon = @mipmap/ic_launcher (see
+            README_BUILD.md for the branding asset pipeline).
+
+  Permission rationale (all requested permissions are used by a shipped or
+  explicitly staged feature - Play Store reviews ask for exactly this):
+    * READ_MEDIA_* / READ_EXTERNAL_STORAGE  -> importing clips, music, images
+    * WRITE_EXTERNAL_STORAGE (<= API 29)    -> legacy gallery export path
+    * CAMERA                                -> capture module (record a clip)
+    * RECORD_AUDIO                          -> voiceover recording
+    * WAKE_LOCK                             -> long exports must not sleep
+    * FOREGROUND_SERVICE(_DATA_SYNC)        -> export job survives background
+    * POST_NOTIFICATIONS                    -> export progress notification
+    * INTERNET / ACCESS_NETWORK_STATE       -> staged AI providers only; the
+      editor itself is fully offline (`AiStagingConfig.offlineDefault`)
+
+  The manifest declares no `package` attribute: the AGP namespace from
+  android/app/build.gradle ("com.mopus.studio") resolves `.MainActivity`.
+  =============================================================================
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ===================== Storage / media import ===================== -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <!-- ===================== Capture / voiceover ======================= -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- ===================== Background export job ====================== -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- ================ AI staging (off by default) ===================== -->
+    <!-- Declared so providers can be enabled by a settings toggle later; the
+         app performs no network I/O unless the user opts in. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- ===================== Hardware profile =========================== -->
+    <!-- The render pipeline composites through OpenGL ES 2.0 surfaces; the
+         camera module is optional (gallery-only devices still work). -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <!-- Allow "Share" of a finished export to video-capable apps. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="video/*" />
+        </intent>
+    </queries>
+
+    <application
+        android:label="MOpus Studio"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <!-- Splash background until the first Flutter frame. -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Receive media from the system share sheet. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>

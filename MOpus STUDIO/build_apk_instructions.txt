@@ -1,0 +1,99 @@
+===============================================================================
+ MOpus Studio - BUILD APK INSTRUCTIONS (copy-paste sheet)
+ Package: com.mopus.studio   |   Full guide: README_BUILD.md
+===============================================================================
+
+ 0) PREREQUISITES (one time)
+    - Flutter 3.19+ (stable), Dart 3.3+, JDK 17, Android SDK 34 + build-tools 34
+    - Verify:  flutter doctor -v
+
+ 1) FIRST-TIME SCAFFOLDING (creates android/ ios/ folders; never touches lib/)
+    cd "C:\Users\USER\OneDrive\Desktop\MOpus STUDIO"
+    flutter create --org com.mopus --project-name mopus_studio --platforms=android .
+
+ 2) PACKAGE + MEMORY SETTINGS
+    - android/app/build.gradle:
+         namespace "com.mopus.studio"
+         applicationId "com.mopus.studio"
+         minSdkVersion 24
+         targetSdkVersion 34
+         ndk { abiFilters "armeabi-v7a", "arm64-v8a", "x86_64" }
+    - android/gradle.properties:
+         org.gradle.jvmargs=-Xmx1536M -XX:MaxMetaspaceSize=512m
+    - Keep the AndroidManifest.xml from this repo (do not merge by hand):
+         android/app/src/main/AndroidManifest.xml
+    - If R8/minify is enabled:
+         New-Item -ItemType File android\app\proguard-rules.pro -Force
+
+ 3) RESOLVE + VERIFY
+    flutter clean
+    flutter pub get
+    flutter test
+    flutter analyze
+
+ 4) BUILD THE RELEASE APK (all ABIs, smallest download per device)
+    flutter build apk --release --split-per-abi
+    ->
+      build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk
+      build\app\outputs\flutter-apk\app-arm64-v8a-release.apk
+      build\app\outputs\flutter-apk\app-x86_64-release.apk
+
+ 4b) LOW-MEMORY BUILD MACHINE / 2GB TARGET DEVICES
+    flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 --no-shrink
+
+ 4c) SINGLE UNIVERSAL APK (older devices / sideloading)
+    flutter build apk --release
+
+ 4d) PLAY STORE BUNDLE
+    flutter build appbundle --release
+    ->  build\app\outputs\bundle\release\app-release.aab
+
+ 5) RELEASE-TIME AI CONFIG (no code changes)
+    flutter build apk --release --split-per-abi `
+      --dart-define=MOPUS_AI_ENDPOINT=https://api.example.com `
+      --dart-define=MOPUS_AI_API_KEY=sk-... `
+      --dart-define=MOPUS_ALLOW_NETWORK_AI=false
+    (default is offline: AI providers stay dark until the user opts in)
+
+ 6) OPTIONAL: SMALLER + FASTER RUNTIME ARTIFACTS
+    flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols
+
+ 7) SIGNED RELEASE (needed before store upload)
+    keytool -genkey -v -keystore "%USERPROFILE%\mopus-release.jks" ^
+      -keyalg RSA -keysize 2048 -validity 10000 -alias mopus
+    - android/key.properties (never commit):
+         storePassword=...
+         keyPassword=...
+         keyAlias=mopus
+         storeFile=C:/Users/USER/mopus-release.jks
+    - Wire signingConfigs.release in android/app/build.gradle (README_BUILD.md sec. 6)
+
+ 8) INSTALL + SMOKE TEST
+    adb install -r build\app\outputs\flutter-apk\app-arm64-v8a-release.apk
+    adb shell am start -n com.mopus.studio/.MainActivity
+    - timeline scrub @60fps, export with ExportSettings.lowRam720p30 (720p30 + proxies)
+
+ 9) LAUNCHER ICON (branding)
+    - assets/branding/icon_1024.png : Jet Black #050505 bg, Electric Orange #FF6B00 "MO",
+      Pure White #FFFFFF "pus"
+    - uncomment assets: + flutter_launcher_icons: blocks in pubspec.yaml
+    - flutter pub get
+    - dart run flutter_launcher_icons:main
+
+10) EXPORT RENDER CHECKS (FFmpeg graph)
+    - Desktop/CI:  FfmpegRenderer().render(plan)          (needs ffmpeg 4.4+ on PATH)
+    - Script dump: FfmpegRenderer(keepScript: true)       -> <output>.mp4.sh
+    - On Android the same FfmpegRenderJob.arguments feed the staged native backend.
+    - Version check:  ffmpeg -version   (first line must be "ffmpeg version 4.4"+;
+      nightlies like "N-55702" and the 2013 build inside Python\Scripts are too old)
+    - Diagnostics:    FfmpegRenderer().probe()  -> version + reason it is unsupported
+
+-------------------------------------------------------------------------------
+TROUBLESHOOTING QUICKIES
+ - "unable to find directory entry in pubspec.yaml: assets/*"  -> asset missing;
+   create it or re-comment the assets block in pubspec.yaml.
+ - ".MainActivity not found"                 -> namespace must be com.mopus.studio.
+ - Gradle OOM at :app:minifyReleaseWithR8     -> add --no-shrink, lower jvmargs.
+ - Manifest merge error                       -> keep only the repo manifest at
+   android/app/src/main/AndroidManifest.xml.
+===============================================================================

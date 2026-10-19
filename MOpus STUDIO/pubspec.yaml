@@ -1,0 +1,77 @@
+# =============================================================================
+# MOpus Studio - pubspec.yaml (Module 3)
+# -----------------------------------------------------------------------------
+# Open-source, ultra-lightweight mobile video editor.
+#
+# Dependency policy: ZERO third-party runtime packages.
+#   * Animation/matrix math, the effects library, the FFmpeg command builder and
+#     the AI staging layer are all plain Dart (see lib/engine, lib/services).
+#   * FFmpeg is reached through a process/native backend, not a Dart package, so
+#     nothing here can silently grow the APK or break `flutter pub get` offline.
+#   * AI features are gated behind interfaces: when a provider package is added
+#     later it lives behind lib/services/ai_integration_bridge.dart only.
+#
+# Brand: Jet Black #050505 | Electric Orange #FF6B00 | Pure White #FFFFFF
+# =============================================================================
+name: mopus_studio
+description: >-
+  MOpus Studio - an open-source, ultra-lightweight mobile video editor for
+  2GB-RAM Android devices. Modules 1-3: core UI + multi-track timeline +
+  layer architecture, keyframe animation engine (interpolation, transform
+  matrices, motion blur, playback), offline render pipeline (FFmpeg command
+  graph, effects library, adjustment pass-through) and AI ready-stage
+  architecture.
+publish_to: "none"
+
+# Module 1: 0.1.0 | Module 2: 0.2.0 | Module 3: 0.3.0
+version: 0.3.0+3
+
+environment:
+  # Records (`(int, int)` in ai_integration_bridge) need Dart 3.0+;
+  # patterns/sealed classes in the engine need 3.0+; 3.3 is the Flutter 3.19
+  # baseline that also gives us `abstract final class` support everywhere.
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # --- Intentionally empty: the app ships with zero runtime packages. -------
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # Lints only - never shipped inside the APK.
+  flutter_lints: ^4.0.0
+  # --- Optional, uncomment when you want generated launcher icons -----------
+  # flutter_launcher_icons: ^0.13.1
+  #
+  # Then create assets/branding/icon_1024.png (Jet Black #050505 background,
+  # Electric Orange #FF6B00 "MO" + Pure White #FFFFFF "pus" emblem) and run:
+  #   dart run flutter_launcher_icons:main
+  #
+  # flutter_launcher_icons:
+  #   android: true
+  #   ios: false
+  #   image_path: "assets/branding/icon_1024.png"
+  #   adaptive_icon_background: "#050505"
+  #   adaptive_icon_foreground: "assets/branding/icon_foreground_1024.png"
+  #   remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+
+  # --- Assets ---------------------------------------------------------------
+  # IMPORTANT: a listed directory/file that does not exist makes
+  # `flutter build apk` fail with "unable to find directory entry in
+  # pubspec.yaml". Create the files first, then uncomment the block.
+  #
+  # assets:
+  #   - assets/branding/                # icon_1024.png, icon_foreground_1024.png
+  #   - assets/fonts/                   # falls back to system fonts when absent
+  #
+  # fonts:
+  #   - family: MopusSans
+  #     fonts:
+  #       - asset: assets/fonts/MopusSans-Regular.ttf
+  #       - asset: assets/fonts/MopusSans-Bold.ttf
+  #         weight: 700
