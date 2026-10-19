@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: MOpus STUDIO
 
     steps:
       - uses: actions/checkout@v4
@@ -17,11 +20,9 @@ jobs:
           channel: 'stable'
 
       - name: Install Dependencies
-        working-directory: "MOpus STUDIO"
         run: flutter pub get
 
       - name: Build Release APK
-        working-directory: "MOpus STUDIO"
         run: flutter build apk --release --split-per-abi --no-shrink
 
       - name: Upload APK Artifact
