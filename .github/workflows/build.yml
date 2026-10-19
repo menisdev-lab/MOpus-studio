@@ -7,10 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./MOpus-studio
-
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -22,4 +18,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: mopus-apk
-          path: MOpus STUDIO/build/app/outputs/flutter-apk/
+          path: build/app/outputs/flutter-apk/
