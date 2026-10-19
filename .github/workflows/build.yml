@@ -7,15 +7,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.x'
           channel: 'stable'
-      - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi --no-shrink
-      - uses: actions/upload-artifact@v4
+
+      - name: Install Dependencies
+        working-directory: "MOpus STUDIO"
+        run: flutter pub get
+
+      - name: Build Release APK
+        working-directory: "MOpus STUDIO"
+        run: flutter build apk --release --split-per-abi --no-shrink
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: mopus-apk
-          path: build/app/outputs/flutter-apk/
+          path: MOpus STUDIO/build/app/outputs/flutter-apk/
