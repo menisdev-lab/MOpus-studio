@@ -7,6 +7,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./MOpus-studio
+
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -14,8 +18,8 @@ jobs:
           flutter-version: '3.19.x'
           channel: 'stable'
       - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi
+      - run: flutter build apk --release --split-per-abi --no-shrink
       - uses: actions/upload-artifact@v4
         with:
           name: mopus-apk
-          path: build/app/outputs/flutter-apk/
+          path: MOpus STUDIO/build/app/outputs/flutter-apk/
