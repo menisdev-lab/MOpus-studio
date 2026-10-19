@@ -19,6 +19,9 @@ jobs:
           flutter-version: '3.19.x'
           channel: 'stable'
 
+      - name: Generate Android Scaffold
+        run: flutter create --platforms=android --org com.mopus --project-name mopus_studio .
+
       - name: Install Dependencies
         run: flutter pub get
 
